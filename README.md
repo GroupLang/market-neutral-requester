@@ -31,6 +31,16 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
   <img src="https://github.com/user-attachments/assets/f09e3b94-82f9-4e41-8562-5a56840220ca" width="500">
 </p>
 
+## Downloading the Repository
+
+To download the repository, you can use the following command:
+
+```shell
+git clone https://github.com/GroupLang/market-neutral-requester.git
+```
+
+This command will clone the repository to your local machine, allowing you to explore and work with the code.
+
 ## Installation
 
 1. **Clone the repository**
