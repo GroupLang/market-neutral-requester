@@ -6,8 +6,9 @@ RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs
 
-# Install Playwright
-RUN npm install -g playwright
+# Install Playwright and its dependencies
+RUN npm install -g playwright && \
+    npx playwright install-deps
 
 # Install Python dependencies
 COPY requirements.txt .
