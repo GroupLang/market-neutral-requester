@@ -31,6 +31,14 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
   <img src="https://github.com/user-attachments/assets/f09e3b94-82f9-4e41-8562-5a56840220ca" width="500">
 </p>
 
+## Table of Contents
+- [Overview](#overview)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Key Components and Processes](#key-components-and-processes)
+- [Example](#example)
+- [License](#license)
+
 ## Installation
 
 1. **Clone the repository**
@@ -39,20 +47,28 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
    git clone https://github.com/GroupLang/market-neutral-requester.git
    cd market-neutral-requester
    ```
+
 2. **Install required libraries**
+
+   Ensure you have Python 3.11 installed. Then, create a virtual environment and install the dependencies:
+
    ```shell
    python3.11 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-3. **Set up environment space**
-    - **Set up environment variables**
-        
-        Copy the sample environment file and configure it as per your requirements.
 
-        ```shell
-        [ ! -f .env ] && cp .env.template .env
-        ```
+3. **Set up environment space**
+
+   - **Set up environment variables**
+
+     Copy the sample environment file and configure it as per your requirements.
+
+     ```shell
+     [ ! -f .env ] && cp .env.template .env
+     ```
+
+     Edit the `.env` file to include your API keys and other necessary configurations.
 
 ## Configuration
 
@@ -115,9 +131,11 @@ These configuration variables are stored in the config file, ensuring the Neutra
    
 ## Example
 
-This section shows a conversation once Instance and Proposal are created and resolved.
+This section demonstrates a typical interaction with the system once an Instance and Proposal are created and resolved.
 
-#### Input
+### Input
+
+The input consists of a JSON object containing a message and a model specification:
 
 ```json
 {
@@ -126,7 +144,9 @@ This section shows a conversation once Instance and Proposal are created and res
 }
 ```
 
-#### Output
+### Output
+
+The output is a JSON object that provides a decision based on the input message:
 
 ```json
 {
@@ -135,3 +155,7 @@ This section shows a conversation once Instance and Proposal are created and res
     "action": "SELL"
 }
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
