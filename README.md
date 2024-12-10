@@ -31,6 +31,15 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
   <img src="https://github.com/user-attachments/assets/f09e3b94-82f9-4e41-8562-5a56840220ca" width="500">
 </p>
 
+## Table of Contents
+- [Overview](#overview)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Key Components and Processes](#key-components-and-processes)
+- [Example](#example)
+- [Contribution](#contribution)
+
 ## Installation
 
 1. **Clone the repository**
@@ -72,6 +81,40 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
 
 These configuration variables are stored in the config file, ensuring the Neutral Portfolio Provider can effectively interact with the Market Router by managing its proposals and financial transactions.
 
+## Usage
+
+To use the Market Router scripts, follow these steps:
+
+1. **Register a User**: 
+   ```shell
+   python -m market_router.scripts.register
+   ```
+   This registers a new user with the Market Router API.
+
+2. **Create an API Key**:
+   ```shell
+   python -m market_router.scripts.api_key
+   ```
+   Generates a new API key for authentication.
+
+3. **Deposit Funds**:
+   ```shell
+   python -m market_router.scripts.deposit
+   ```
+   Deposits funds into the Market Router account.
+
+4. **Create an Instance**:
+   ```shell
+   python -m market_router.scripts.instance
+   ```
+   Submits proposals to the Market Router.
+
+5. **Submit Generated Reward**:
+   ```shell
+   python -m market_router.scripts.generated_reward
+   ```
+   Submits the generated reward after the conversation ends.
+
 ## Key Components and Processes
 
 **Market Router Scripts:**
@@ -91,7 +134,7 @@ These configuration variables are stored in the config file, ensuring the Neutra
    ```shell
    python -m market_router.scripts.deposit
    ```
-   This command facilitates depositing funds into an Market Router account, as specified in the `deposit_amount` configuration.
+   This command facilitates depositing funds into a Market Router account, as specified in the `deposit_amount` configuration.
 
 4. **Create Instance Script**
    ```shell
@@ -113,6 +156,16 @@ These configuration variables are stored in the config file, ensuring the Neutra
    
 
    
+## Contribution
+
+We welcome contributions! Please follow these steps to contribute:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Make your changes and commit them with clear messages.
+4. Push your changes to your fork.
+5. Open a pull request with a detailed description of your changes.
+
 ## Example
 
 This section shows a conversation once Instance and Proposal are created and resolved.
