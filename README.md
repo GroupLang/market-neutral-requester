@@ -35,24 +35,32 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
 
 1. **Clone the repository**
 
+   Clone the repository to your local machine using the following command:
+
    ```shell
    git clone https://github.com/GroupLang/market-neutral-requester.git
    cd market-neutral-requester
    ```
+
 2. **Install required libraries**
+
+   Set up a virtual environment and install the required libraries:
+
    ```shell
    python3.11 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-3. **Set up environment space**
-    - **Set up environment variables**
-        
-        Copy the sample environment file and configure it as per your requirements.
 
-        ```shell
-        [ ! -f .env ] && cp .env.template .env
-        ```
+3. **Set up environment space**
+
+   Configure your environment variables by copying the sample environment file and editing it as needed:
+
+   ```shell
+   [ ! -f .env ] && cp .env.template .env
+   ```
+
+   Open `.env` and fill in the necessary details such as API keys and user credentials.
 
 ## Configuration
 
@@ -71,6 +79,58 @@ Then, when the instance is resolved, it evaluates the proposal as follows:
   - **Percentage Reward**: The percentage of the Gen Reward that the requester will pay to the provider once the interaction is completed.
 
 These configuration variables are stored in the config file, ensuring the Neutral Portfolio Provider can effectively interact with the Market Router by managing its proposals and financial transactions.
+
+## Usage
+
+Here are some examples of how to use the scripts provided in this repository:
+
+1. **Register a new user**:
+
+   ```shell
+   python -m market_router.scripts.register
+   ```
+
+   This command registers a new user with the Market Router API. If an `MARKET_ROUTER_KEY` exists (indicating prior registration), this script is unnecessary.
+
+2. **Create an API key**:
+
+   ```shell
+   python -m market_router.scripts.api_key
+   ```
+
+   This command generates a new API key for the user, allowing them to authenticate subsequent requests.
+
+3. **Deposit funds**:
+
+   ```shell
+   python -m market_router.scripts.deposit
+   ```
+
+   This command facilitates depositing funds into a Market Router account, as specified in the `deposit_amount` configuration.
+
+4. **Create an instance**:
+
+   ```shell
+   python -m market_router.scripts.instance
+   ```
+
+   This script submits proposals to the Market Router using `config`.
+
+5. **Interact with the proposal endpoint**:
+
+   ```shell
+   python -m src.scripts.sector_market_pipeline --market="sp500" --sector="Energy"
+   ```
+
+   Interacts with the proposal endpoint before submitting the reward.
+
+6. **Submit the generated reward**:
+
+   ```shell
+   python -m market_router.scripts.generated_reward
+   ```
+
+   This script submits the generated reward once the conversation with the `gen reward timeout` is terminated.
 
 ## Key Components and Processes
 
