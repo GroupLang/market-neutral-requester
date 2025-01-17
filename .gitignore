@@ -24,3 +24,4 @@ ENV/
 *.pyo
 *.pyd
 *.swp
+.aider*

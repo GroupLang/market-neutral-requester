@@ -1,3 +1,4 @@
+import os
 import random
 
 import requests
@@ -146,21 +147,25 @@ def get_proposal(instance_id: str, api_key: str):
 
 
 def get_predictions(baseline_prompt: str, api_key: str, instance_id: str):
-    headers = {"X-API-KEY": api_key}
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    headers = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Content-Type": "application/json"
+    }
     data = {
         "messages": [{"role": "user", "content": baseline_prompt}],
-        "model": config["model"],
+        "model": "gpt-4o-mini"
     }
     try:
         response = requests.post(
-            f"{config['api_url']}/v1/chat/completions/{instance_id}",
+            "https://api.openai.com/v1/chat/completions",
             json=data,
             headers=headers,
         )
         response.raise_for_status()
         response_data = response.json()
-        if response.status_code == status.codes.created:
-            logger.info(f"Predictions retrieved successfully")
+        if response.status_code == status.codes.ok:
+            logger.info("Predictions retrieved successfully")
 
         return response_data
 

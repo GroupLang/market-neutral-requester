@@ -8,7 +8,7 @@ from market_router.expections import CreateCompletionError
 def create_completion(system_msg, user_msg):
     try:
         completion = openai.chat.completions.create(
-            model=config["model"],
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": user_msg},

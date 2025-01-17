@@ -22,9 +22,8 @@ def get_model_predictions(news: str, tickers: list, instance_id: str = None) -> 
 
         decision = _get_decision(predictions)
 
-        decisions.append({"ticker": ticker, "decision": decision})
+        decisions.append({"ticker": ticker.symbol, "decision": decision})
 
-        logger.info(f"Predictions: {predictions['response']['choices'][0]['message']['content']}")
 
     return decisions
 
@@ -35,9 +34,10 @@ def _format_baseline_prompt(news: str, ticker: str):
 
 def _get_decision(response: str) -> str:
     try:
-        content = response["response"]["choices"][0]["message"]["content"]
+        content = response["choices"][0]["message"]["content"].lower()
+        action = content.split("action")[1]
 
-        return json.loads(content)["action"]
+        return "buy" if "buy" in action else "sell" if "sell" in action else "hold"
 
     except (json.JSONDecodeError, KeyError, IndexError) as e:
         logger.error(f"Error decoding response: {e}")

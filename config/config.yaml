@@ -4,7 +4,7 @@ api_url: "https://api.marketrouter.ai"
 deposit_amount: 0.2
 
 # Configuration file for the Market Neutral Strategy System
-model: "gpt-4o-mini"
+model: "gpt-4o"
 temperature: 0.9
 max_tokens: 16384
 messages: [{"role": "user", "content": "First message from market neutral strategy to test the system."}]
