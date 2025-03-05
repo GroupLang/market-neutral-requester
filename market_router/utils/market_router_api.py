@@ -5,6 +5,7 @@ import time
 import requests
 import requests.status_codes as status
 from loguru import logger
+import openai
 
 from market_router import config
 
@@ -205,6 +206,80 @@ def get_predictions(baseline_prompt: str, api_key: str, instance_id: str):
         logger.info("Predictions retrieved successfully using AWS Bedrock")
         return formatted_response
 
+    except requests.exceptions.RequestException as e:
+        logger.error(f"HTTP request failed: {e.response.text}")
+        raise e
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        raise e
+
+
+def get_predictions_gpt4(baseline_prompt: str, api_key: str, instance_id: str):
+    """
+    Get predictions using OpenAI's GPT-4 API instead of AWS Bedrock.
+    
+    This function maintains the same interface and return format as get_predictions
+    but uses the OpenAI API client instead of Bedrock.
+    
+    Args:
+        baseline_prompt (str): The prompt to send to the model
+        api_key (str): API key for the market router API (not used for OpenAI calls)
+        instance_id (str): Instance ID for tracking
+        
+    Returns:
+        dict: Formatted response matching the structure of the original function
+        
+    Raises:
+        Exception: If an error occurs during the API call
+    """
+    try:
+        # Check if OpenAI API key is available
+        openai_api_key = os.environ.get("OPENAI_API_KEY")
+        if not openai_api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+            
+        # Initialize the OpenAI client
+        client = openai.OpenAI(api_key=openai_api_key)
+        
+        # Call the OpenAI API with GPT-4
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",  # Using GPT-4 Turbo for similar capabilities to Claude 3.5
+            messages=[
+                {"role": "user", "content": baseline_prompt}
+            ],
+            max_tokens=config.get("max_tokens", 16384),
+            temperature=config.get("temperature", 0.7)
+        )
+        
+        # Format response to match the expected structure from the original function
+        formatted_response = {
+            "id": instance_id,
+            "object": "chat.completion",
+            "created": int(time.time()),
+            "model": "gpt-4o",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": response.choices[0].message.content
+                    },
+                    "finish_reason": response.choices[0].finish_reason
+                }
+            ],
+            "usage": {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+        }
+        
+        logger.info("Predictions retrieved successfully using OpenAI GPT-4")
+        return formatted_response
+
+    except openai.OpenAIError as e:
+        logger.error(f"OpenAI API error: {e}")
+        raise e
     except requests.exceptions.RequestException as e:
         logger.error(f"HTTP request failed: {e.response.text}")
         raise e
