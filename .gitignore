@@ -25,3 +25,6 @@ ENV/
 *.pyd
 *.swp
 .aider*
+data/
+plots/exponential_strategies/
+plots/market_neutral/

@@ -1,5 +1,6 @@
 import os
 import random
+import time
 
 import requests
 import requests.status_codes as status
@@ -147,27 +148,62 @@ def get_proposal(instance_id: str, api_key: str):
 
 
 def get_predictions(baseline_prompt: str, api_key: str, instance_id: str):
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    headers = {
-        "Authorization": f"Bearer {openai_api_key}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "messages": [{"role": "user", "content": baseline_prompt}],
-        "model": "gpt-4o-mini"
-    }
+    import boto3
+    import json
+    
     try:
-        response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            json=data,
-            headers=headers,
+        # Initialize the Bedrock Runtime client
+        bedrock_runtime = boto3.client(
+            service_name="bedrock-runtime",
+            region_name=os.environ.get("AWS_REGION"),
+            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY")
         )
-        response.raise_for_status()
-        response_data = response.json()
-        if response.status_code == status.codes.ok:
-            logger.info("Predictions retrieved successfully")
-
-        return response_data
+        
+        # Prepare the request for Claude in Bedrock format
+        request_body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": config.get("max_tokens", 16384),
+            "temperature": config.get("temperature", 0.7),
+            "messages": [
+                {"role": "user", "content": baseline_prompt}
+            ]
+        }
+        
+        # Call the Bedrock Invoke API with Claude 3.5 Sonnet
+        response = bedrock_runtime.invoke_model(
+            modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            body=json.dumps(request_body)
+        )
+        
+        # Parse the response
+        response_body = json.loads(response.get("body").read())
+        
+        # Format response to match expected structure similar to OpenAI's response
+        formatted_response = {
+            "id": instance_id,
+            "object": "chat.completion",
+            "created": int(time.time()),
+            "model": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": response_body["content"][0]["text"]
+                    },
+                    "finish_reason": "stop"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": -1,  # Bedrock doesn't provide token counts in the same way
+                "completion_tokens": -1,
+                "total_tokens": -1
+            }
+        }
+        
+        logger.info("Predictions retrieved successfully using AWS Bedrock")
+        return formatted_response
 
     except requests.exceptions.RequestException as e:
         logger.error(f"HTTP request failed: {e.response.text}")

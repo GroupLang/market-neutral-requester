@@ -33,7 +33,7 @@ def process_sector(args):
 def main():
     try:
         market = "sp500"
-        start_date = '2024-11-14'
+        start_date = '2024-09-20'
         end_date = datetime.today().strftime('%Y-%m-%d')
         trading_days = get_trading_days(start_date, end_date)
         
@@ -53,7 +53,7 @@ def main():
         ]
 
         # Set up multiprocessing pool
-        num_cores = 4  # Leave one core free
+        num_cores = 6  # Leave one core free
         pool = Pool(processes=num_cores)
 
         for date in trading_days:
@@ -66,10 +66,10 @@ def main():
             results = pool.map(process_sector, args_list)
             
             # Combine results
-            existing_df = pd.read_csv("gpt_raw_decisions.csv")
+            existing_df = pd.read_csv("data/gpt_raw_decisions_o1.csv")
             combined_df = pd.concat([existing_df] + [df for df in results if not df.empty], 
                                   ignore_index=True)
-            combined_df.to_csv("gpt_raw_decisions.csv", index=False)
+            combined_df.to_csv("data/gpt_raw_decisions_o1.csv", index=False)
 
         pool.close()
         pool.join()
