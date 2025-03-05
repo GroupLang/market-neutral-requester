@@ -33,7 +33,7 @@ def process_sector(args):
 def main():
     try:
         market = "sp500"
-        start_date = '2024-09-20'
+        start_date = '2024-10-18'
         end_date = datetime.today().strftime('%Y-%m-%d')
         trading_days = get_trading_days(start_date, end_date)
         

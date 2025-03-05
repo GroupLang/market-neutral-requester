@@ -4,19 +4,38 @@ from strategies.exponential_strategy_shorts import ExponentialStrategyShorts
 from strategies.market_neutral import MarketNeutralStrategy
 from strategies.buy_and_hold import BuyAndHoldStrategy
 import pandas as pd
+from datetime import datetime
 # %%
 cash = 1000
-market_data = pd.read_csv("data/market.csv")
+end_date = datetime.today().strftime('%Y-%m-%d')
+market_data = pd.read_csv("data/markets/sp500.csv")
+
 exp_strat_shorts = ExponentialStrategyShorts(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
 exp_strat = ExponentialStrategy(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
 market_neutral = MarketNeutralStrategy(cash, "2023-03-03", "2025-01-16", market_data, save_data=True, test_type="backtest")
 buy_and_hold = BuyAndHoldStrategy(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
 
 # %%
-exp_strat.loc[exp_strat["date"] >= "2023-09-06", "test_type"] = "forward"
-exp_strat_shorts.loc[exp_strat_shorts["date"] >= "2023-09-06", "test_type"] = "forward"
-market_neutral.loc[market_neutral["date"]  >= "2023-09-06", "test_type"] = "forward"
-buy_and_hold.loc[buy_and_hold["date"] >= "2023-09-06", "test_type"] = "forward"
+# Fix IndexingError by using a different approach to update test_type field
+# For exp_strat
+forward_data = exp_strat.portfolio_total[exp_strat.portfolio_total.index >= "2023-09-06"]
+forward_data["test_type"] = "forward"
+exp_strat.portfolio_total.update(forward_data)
+
+# For exp_strat_shorts
+forward_data = exp_strat_shorts.portfolio_total[exp_strat_shorts.portfolio_total.index >= "2023-09-06"]
+forward_data["test_type"] = "forward"
+exp_strat_shorts.portfolio_total.update(forward_data)
+
+# For market_neutral
+forward_data = market_neutral.portfolio_total[market_neutral.portfolio_total.index >= "2023-09-06"]
+forward_data["test_type"] = "forward"
+market_neutral.portfolio_total.update(forward_data)
+
+# For buy_and_hold
+forward_data = buy_and_hold.portfolio_total[buy_and_hold.portfolio_total.index >= "2023-09-06"]
+forward_data["test_type"] = "forward"
+buy_and_hold.portfolio_total.update(forward_data)
 
 # %%
 from plots.plots_agg import plot_comparison_tickers
@@ -95,3 +114,5 @@ scatter_market_neutral_vs_buy_and_hold_sectors(
     market_data=market_data,
     output_file="plots/market_neutral/scatter_market_neutral_vs_buy_and_hold_sectors",
 )
+
+# %%

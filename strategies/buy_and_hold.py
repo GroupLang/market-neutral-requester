@@ -14,7 +14,6 @@ class BuyAndHoldStrategy(Strategy):
         self.dates = self.prices.index
         self.compute_performance()
         returns = self.save_returns(self.portfolio_value_per_asset, test_type, "buy_and_hold.csv")
-        return returns
 
     def compute_performance(self):
         """Compute the performance of the strategy."""

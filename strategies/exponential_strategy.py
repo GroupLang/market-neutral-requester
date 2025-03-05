@@ -24,7 +24,6 @@ class ExponentialStrategy(Strategy):
         returns = self.save_returns(
             self.portfolio_value_per_asset, test_type, "exponential_returns.csv"
         )
-        return returns
 
     def compute_performance(self):
         """Compute the performance of the strategy."""
