@@ -21,8 +21,15 @@ HEADERS = {
     "content-type": "application/json",
     "accept": "application/json",
 }
-DATA_PATH = os.path.join(os.getcwd(), "")
-DECISIONS_FILE = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
+# Get the directory where the script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Get the project root directory (parent of strategies)
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+DATA_PATH = os.path.join(PROJECT_ROOT, "data")
+DECISIONS_FILE = os.environ.get("INPUT_FILE", "gpt_raw_decisions_o1.csv")
+DECISIONS_FILE = DECISIONS_FILE.replace("data/", "")
+logger.info(f"Data path: {DATA_PATH}")
+logger.info(f"Decisions file: {DECISIONS_FILE}")
 
 class Strategy(ABC):
     def __init__(self, save_data: bool = False, test_type: str = "forward"):
@@ -31,8 +38,11 @@ class Strategy(ABC):
         self.test_type = test_type
 
     def load_data(self, init_date: str, end_date: str):
+        # Handle both absolute and relative paths
+        decisions_path = DECISIONS_FILE if os.path.isabs(DECISIONS_FILE) else os.path.join(DATA_PATH, DECISIONS_FILE)
+        
         if os.path.exists(DATA_PATH):
-            data = pd.read_csv(os.path.join(DATA_PATH, DECISIONS_FILE)).drop_duplicates(
+            data = pd.read_csv(decisions_path).drop_duplicates(
                 subset=["date", "ticker"], keep="last"
             )
             data = data.loc[(data["date"] >= init_date) & (data["date"] <= end_date)]
@@ -129,12 +139,22 @@ class Strategy(ABC):
 
     def _save_csv(self, data: pd.DataFrame, test_type: str):
         data = data.assign(test_type=test_type)
-        data.to_csv(os.path.join(DATA_PATH, DECISIONS_FILE), index=False)
+        # Handle both absolute and relative paths
+        decisions_path = DECISIONS_FILE if os.path.isabs(DECISIONS_FILE) else os.path.join(DATA_PATH, DECISIONS_FILE)
+        data.to_csv(decisions_path, index=False)
 
     def save_returns(self, portfolio_values_per_asset, test_type, output_file):
         portfolio_returns = portfolio_values_per_asset.pct_change().iloc[1:]
         portfolio_returns = portfolio_returns.assign(test_type=test_type)
-        portfolio_returns.to_csv(os.path.join(DATA_PATH, output_file))
+        
+        # Ensure data directory exists
+        os.makedirs(DATA_PATH, exist_ok=True)
+        
+        # Handle output path - strip any data/ prefix and use DATA_PATH
+        clean_output_file = output_file.replace('data/', '')
+        output_path = os.path.join(DATA_PATH, clean_output_file)
+        
+        portfolio_returns.to_csv(output_path)
         return portfolio_returns
 
     @abstractmethod
