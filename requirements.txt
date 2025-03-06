@@ -1,5 +1,5 @@
 loguru==0.7.2
-openai==1.26.1
+openai==1.26.0
 exa-py==1.1.8
 PyYAML==6.0.1
 pandas==2.2.2
