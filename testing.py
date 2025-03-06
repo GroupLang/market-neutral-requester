@@ -3,6 +3,7 @@ from strategies.exponential_strategy_shorts import ExponentialStrategyShorts
 from strategies.market_neutral import MarketNeutralStrategy
 from strategies.buy_and_hold import BuyAndHoldStrategy
 import pandas as pd
+import os
 from datetime import datetime
 from plots.plots import plot_comparison_tickers
 from plots.plots import plot_comparison_sectors
@@ -10,6 +11,10 @@ from plots.plots import plot_comparison_sectors
 cash = 1000
 end_date = datetime.today().strftime('%Y-%m-%d')
 market_data = pd.read_csv("data/markets/sp500.csv")
+
+# Get input file path from environment variable or use default
+input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
+decisions_data = pd.read_csv(input_file)
 
 exp_strat_shorts = ExponentialStrategyShorts(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
 exp_strat = ExponentialStrategy(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")

@@ -1,5 +1,6 @@
 import pandas as pd
 import sys
+import os
 from datetime import datetime, timedelta
 import logging
 import pandas_market_calendars as mcal
@@ -30,13 +31,38 @@ def process_sector(args):
         logger.error(f"The pipeline raised the following error for {sector}: {e}")
         return pd.DataFrame()  # Return empty DataFrame on error
 
+def get_latest_date_from_csv(file_path):
+    try:
+        df = pd.read_csv(file_path)
+        if 'date' in df.columns:
+            return df['date'].max()
+        return None
+    except Exception as e:
+        logger.error(f"Error reading {file_path}: {e}")
+        return None
+
 def main():
     try:
         market = "sp500"
-        start_date = '2024-10-18'
+        
+        # Get input file path from environment variable or use default
+        input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
+        
+        # Get latest date from the input file
+        latest_date = get_latest_date_from_csv(input_file)
+        if latest_date is None:
+            logger.error("Could not get latest date from input file")
+            return
+            
+        start_date = latest_date
         end_date = datetime.today().strftime('%Y-%m-%d')
         trading_days = get_trading_days(start_date, end_date)
         
+        # Only execute if latest_date is more than 2 trading days old
+        if len(trading_days) <= 3:
+            logger.info(f"Latest date {latest_date} is too recent (less than 2 trading days old). Skipping execution.")
+            return
+            
         # Get unique sectors from SP500 data
         sectors = [
             "Information Technology",
@@ -65,11 +91,14 @@ def main():
             # Process sectors in parallel
             results = pool.map(process_sector, args_list)
             
+            # Get input file path from environment variable or use default
+            input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
+            
             # Combine results
-            existing_df = pd.read_csv("data/gpt_raw_decisions_o1.csv")
+            existing_df = pd.read_csv(input_file)
             combined_df = pd.concat([existing_df] + [df for df in results if not df.empty], 
                                   ignore_index=True)
-            combined_df.to_csv("data/gpt_raw_decisions_o1.csv", index=False)
+            combined_df.to_csv(input_file, index=False)
 
         pool.close()
         pool.join()

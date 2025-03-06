@@ -165,7 +165,7 @@ def get_predictions(baseline_prompt: str, api_key: str, instance_id: str):
         request_body = {
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": config.get("max_tokens", 16384),
-            "temperature": config.get("temperature", 0.7),
+            "temperature": config.get("temperature", random.uniform(0.0, 1.0)),
             "messages": [
                 {"role": "user", "content": baseline_prompt}
             ]
