@@ -10,16 +10,15 @@ from plots.plots import plot_comparison_sectors
 
 cash = 1000
 end_date = datetime.today().strftime('%Y-%m-%d')
+end_date = pd.Timestamp(end_date) - pd.Timedelta(days=2)
+end_date = end_date.strftime('%Y-%m-%d')
+
 market_data = pd.read_csv("data/markets/sp500.csv")
 
-# Get input file path from environment variable or use default
-input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
-decisions_data = pd.read_csv(input_file)
-
-exp_strat_shorts = ExponentialStrategyShorts(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
-exp_strat = ExponentialStrategy(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
-market_neutral = MarketNeutralStrategy(cash, "2023-03-03", "2025-01-16", market_data, save_data=True, test_type="backtest")
-buy_and_hold = BuyAndHoldStrategy(cash, "2023-03-03", "2025-01-16", save_data=True, test_type="backtest")
+exp_strat_shorts = ExponentialStrategyShorts(cash, "2023-03-03", end_date, save_data=True, test_type="backtest")
+exp_strat = ExponentialStrategy(cash, "2023-03-03", end_date, save_data=True, test_type="backtest")
+market_neutral = MarketNeutralStrategy(cash, "2023-03-03", end_date, market_data, save_data=True, test_type="backtest")
+buy_and_hold = BuyAndHoldStrategy(cash, "2023-03-03", end_date, save_data=True, test_type="backtest")
 
 # %%
 # Fix IndexingError by using a different approach to update test_type field

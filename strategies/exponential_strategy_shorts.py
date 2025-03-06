@@ -22,7 +22,7 @@ class ExponentialStrategyShorts(Strategy):
         self.dates = self.prices.index
         self.compute_performance()
         returns = self.save_returns(
-            self.portfolio_value_per_asset, test_type, "exponential_short_returns.csv"
+            self.portfolio_value_per_asset, test_type, "data/exponential_short_returns.csv"
         )
 
     def compute_performance(self):

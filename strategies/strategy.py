@@ -21,8 +21,8 @@ HEADERS = {
     "content-type": "application/json",
     "accept": "application/json",
 }
-DATA_PATH = os.path.join(os.getcwd(), "data")
-DECISIONS_FILE = "gpt_raw_decisions_o1.csv"
+DATA_PATH = os.path.join(os.getcwd(), "")
+DECISIONS_FILE = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
 
 class Strategy(ABC):
     def __init__(self, save_data: bool = False, test_type: str = "forward"):

@@ -14,7 +14,7 @@ class MarketNeutralStrategy(Strategy):
         self.total_market_cap = self.market_caps.sum()
         self.dates = self.prices.index
         self.compute_performance()
-        returns = self.save_returns(self.portfolio_value_per_asset, test_type, "market_neutral_returns.csv")
+        returns = self.save_returns(self.portfolio_value_per_asset, test_type, "data/market_neutral_returns.csv")
 
     def compute_performance(self):
         """Compute the performance of the strategy."""

@@ -54,15 +54,17 @@ run_scripts_with_params() {
         
         # Upload plots to S3 with optional suffix
         if [ -n "$s3_suffix" ]; then
-            log_message "Uploading plots to S3 bucket $S3_BUCKET with suffix $s3_suffix"
-            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+            log_message "Uploading plots and data to S3 bucket $S3_BUCKET with suffix $s3_suffix"
+            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
+               aws s3 sync ./data s3://$S3_BUCKET/$s3_suffix/data --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
                 log_message "S3 upload with suffix $s3_suffix completed successfully"
             else
                 log_error "S3 upload with suffix $s3_suffix failed with exit code $?"
             fi
         else
-            log_message "Uploading plots to S3 bucket $S3_BUCKET"
-            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+            log_message "Uploading plots and data to S3 bucket $S3_BUCKET"
+            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
+               aws s3 sync ./data s3://$S3_BUCKET/data --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
                 log_message "S3 upload completed successfully"
             else
                 log_error "S3 upload failed with exit code $?"
@@ -81,10 +83,10 @@ run_workflows() {
     
     # Run second execution with data/gpt_raw_decisions_o2.csv and no suffix
     log_message "Starting second execution with data/gpt_raw_decisions.csv"
-    run_scripts_with_params "data/gpt_raw_decisions.csv" ""
+    run_scripts_with_params "data/gpt_raw_decisions.csv" "gpt4o"
     # Run first execution with data/gpt_raw_decisions_o1.csv and suffix_o1
     log_message "Starting first execution with data/gpt_raw_decisions_o1.csv and suffix_o1"
-    run_scripts_with_params "data/gpt_raw_decisions_o1.csv" "suffix_o1"
+    run_scripts_with_params "data/gpt_raw_decisions_o1.csv" "o1"
 
 
     log_message "All executions completed successfully"
@@ -94,6 +96,8 @@ run_workflows() {
 log_message "Scheduler started"
 log_message "Checking for midnight (00:00) every 30 seconds in Spanish timezone (Europe/Madrid)"
 
+
+run_workflows
 # Main loop
 while true; do
     # Get current hour and minute in Spanish timezone
@@ -101,7 +105,7 @@ while true; do
     CURRENT_MINUTE=$(date +"%M")
     
     # Check if it's midnight (00:00)
-    if [ "$CURRENT_HOUR" == "00" ] && [ "$CURRENT_MINUTE" == "00" ]; then
+    if [ "$CURRENT_HOUR" == "00" ] && [ "$CURRENT_MINUTE" == "10" ]; then
         log_message "It's midnight! Starting script execution"
         run_workflows
         
@@ -111,8 +115,6 @@ while true; do
         sleep 23h 55m
     fi
 
-    run_workflows
-    
     # Sleep for 30 seconds before checking again
     sleep 30
 done
