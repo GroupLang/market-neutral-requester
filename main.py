@@ -58,10 +58,14 @@ def main():
         end_date = datetime.today().strftime('%Y-%m-%d')
         trading_days = get_trading_days(start_date, end_date)
         
-        # Only execute if latest_date is more than 2 trading days old
-        if len(trading_days) <= 3:
-            logger.info(f"Latest date {latest_date} is too recent (less than 2 trading days old). Skipping execution.")
+        # Get the two trading days before the latest date
+        if not trading_days:
+            logger.info(f"No trading days found between {start_date} and {end_date}")
             return
+            
+        # Take only the first two trading days (if available)
+        trading_days = trading_days[1:-2]
+        logger.info(f"Processing trading days: {trading_days}")
             
         # Get unique sectors from SP500 data
         sectors = [
