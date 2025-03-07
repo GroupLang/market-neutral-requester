@@ -130,7 +130,7 @@ class Strategy(ABC):
         ).drop_duplicates(subset=["date", "ticker"], keep="last")
 
         if self.save_data:
-            data = pd.concat([old_data, data.assign(test_type=test_type)])
+            data = pd.concat([old_data, data])
             self._save_csv(data, test_type)
 
         prices = data.pivot(index="date", columns="ticker", values="price")
@@ -138,14 +138,12 @@ class Strategy(ABC):
         return prices, decisions
 
     def _save_csv(self, data: pd.DataFrame, test_type: str):
-        data = data.assign(test_type=test_type)
         # Handle both absolute and relative paths
         decisions_path = DECISIONS_FILE if os.path.isabs(DECISIONS_FILE) else os.path.join(DATA_PATH, DECISIONS_FILE)
         data.to_csv(decisions_path, index=False)
 
     def save_returns(self, portfolio_values_per_asset, test_type, output_file):
         portfolio_returns = portfolio_values_per_asset.pct_change().iloc[1:]
-        portfolio_returns = portfolio_returns.assign(test_type=test_type)
         
         # Ensure data directory exists
         os.makedirs(DATA_PATH, exist_ok=True)
