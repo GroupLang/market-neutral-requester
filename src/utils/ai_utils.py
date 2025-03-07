@@ -6,6 +6,9 @@ import openai
 
 from market_router import config
 from market_router.expections import CreateCompletionError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def create_completion(system_msg, user_msg):
