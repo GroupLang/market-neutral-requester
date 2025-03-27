@@ -46,7 +46,7 @@ def get_latest_date_from_csv(file_path):
 
 def main():
     try:
-        print("Running main")
+        print("Running")
         logger.info("Running main")
         market = "sp500"
         
