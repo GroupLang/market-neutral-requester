@@ -53,6 +53,7 @@ def main():
         # Get input file path from environment variable or use default
         input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
         
+        print(f"Using input file: {input_file}")
         # Get latest date from the input file
         latest_date = get_latest_date_from_csv(input_file)
         if latest_date is None:
