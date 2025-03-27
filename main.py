@@ -71,6 +71,7 @@ def main():
             logger.info(f"No trading days found between {start_date} and {end_date}")
             return
             
+        print(f"Trading days between {start_date} and {end_date}: {trading_days}")
         # Take only the first two trading days (if available)
         trading_days = trading_days[1:-2]
         print(f"Processing trading days: {trading_days}")
