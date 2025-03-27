@@ -43,6 +43,8 @@ def get_latest_date_from_csv(file_path):
 
 def main():
     try:
+        logger.info("Running main")
+        print("Running main")
         market = "sp500"
         
         # Get input file path from environment variable or use default
