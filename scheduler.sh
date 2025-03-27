@@ -55,16 +55,18 @@ run_scripts_with_params() {
         # Upload plots to S3 with optional suffix
         if [ -n "$s3_suffix" ]; then
             log_message "Uploading plots and data to S3 bucket $S3_BUCKET with suffix $s3_suffix"
-            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE" && \
-               aws s3 sync ./data s3://$S3_BUCKET/$s3_suffix/data --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
+            sleep 2  # Ensure file writes complete
+            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION --exact-timestamps --delete 2>> "$ERROR_LOG" | tee -a "$LOG_FILE" && \
+               aws s3 sync ./data s3://$S3_BUCKET/$s3_suffix/data --region $S3_REGION --exact-timestamps --delete 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
                 log_message "S3 upload with suffix $s3_suffix completed successfully"
             else
                 log_error "S3 upload with suffix $s3_suffix failed with exit code $?"
             fi
         else
             log_message "Uploading plots and data to S3 bucket $S3_BUCKET"
-            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE" && \
-               aws s3 sync ./data s3://$S3_BUCKET/data --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
+            sleep 2  # Ensure file writes complete
+            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION --exact-timestamps --delete 2>> "$ERROR_LOG" | tee -a "$LOG_FILE" && \
+               aws s3 sync ./data s3://$S3_BUCKET/data --region $S3_REGION --exact-timestamps --delete 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
                 log_message "S3 upload completed successfully"
             else
                 log_error "S3 upload failed with exit code $?"
