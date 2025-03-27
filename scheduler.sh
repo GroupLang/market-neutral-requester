@@ -33,12 +33,12 @@ run_scripts_with_params() {
     
     # Run main.py with input file environment variable
     log_message "Running main.py with input file: $input_file"
-    if INPUT_FILE="$input_file" python3 main.py 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+    if INPUT_FILE="$input_file" python3 main.py 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
         log_message "main.py executed successfully"
         
         # Run testing.py
         log_message "Running testing.py"
-        if INPUT_FILE="$input_file" python3 testing.py 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+        if INPUT_FILE="$input_file" python3 testing.py 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
             log_message "testing.py executed successfully"
         else
             log_error "testing.py failed with exit code $?"
@@ -46,7 +46,7 @@ run_scripts_with_params() {
         
         # Run testing_agg_plot.py
         log_message "Running testing_agg_plot.py"
-        if INPUT_FILE="$input_file" python3 testing_agg_plot.py 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+        if INPUT_FILE="$input_file" python3 testing_agg_plot.py 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
             log_message "testing_agg_plot.py executed successfully"
         else
             log_error "testing_agg_plot.py failed with exit code $?"
@@ -55,16 +55,16 @@ run_scripts_with_params() {
         # Upload plots to S3 with optional suffix
         if [ -n "$s3_suffix" ]; then
             log_message "Uploading plots and data to S3 bucket $S3_BUCKET with suffix $s3_suffix"
-            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
-               aws s3 sync ./data s3://$S3_BUCKET/$s3_suffix/data --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE" && \
+               aws s3 sync ./data s3://$S3_BUCKET/$s3_suffix/data --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
                 log_message "S3 upload with suffix $s3_suffix completed successfully"
             else
                 log_error "S3 upload with suffix $s3_suffix failed with exit code $?"
             fi
         else
             log_message "Uploading plots and data to S3 bucket $S3_BUCKET"
-            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
-               aws s3 sync ./data s3://$S3_BUCKET/data --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE" && \
+               aws s3 sync ./data s3://$S3_BUCKET/data --region $S3_REGION 2>> "$ERROR_LOG" | tee -a "$LOG_FILE"; then
                 log_message "S3 upload completed successfully"
             else
                 log_error "S3 upload failed with exit code $?"
