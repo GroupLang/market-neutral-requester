@@ -22,12 +22,14 @@ def get_trading_days(start_date, end_date):
 
 def process_sector(args):
     market, date, sector = args
+    print(f"Processing sector: {sector} on date: {date}")
     logger.info(f"Processing sector: {sector} on date: {date}")
     try:
         decisions = sector_market_pipeline(market, date, sector)
         df = pd.DataFrame(decisions)
         return df
     except Exception as e:
+        print(f"The pipeline raised the following error for {sector}: {e}")
         logger.error(f"The pipeline raised the following error for {sector}: {e}")
         return pd.DataFrame()  # Return empty DataFrame on error
 
@@ -38,13 +40,14 @@ def get_latest_date_from_csv(file_path):
             return df['date'].max()
         return None
     except Exception as e:
+        print(f"Error reading {file_path}: {e}")
         logger.error(f"Error reading {file_path}: {e}")
         return None
 
 def main():
     try:
-        logger.info("Running main")
         print("Running main")
+        logger.info("Running main")
         market = "sp500"
         
         # Get input file path from environment variable or use default
@@ -53,6 +56,7 @@ def main():
         # Get latest date from the input file
         latest_date = get_latest_date_from_csv(input_file)
         if latest_date is None:
+            print("Could not get latest date from input file")
             logger.error("Could not get latest date from input file")
             return
             
@@ -62,11 +66,13 @@ def main():
         
         # Get the two trading days before the latest date
         if not trading_days:
+            print(f"No trading days found between {start_date} and {end_date}")
             logger.info(f"No trading days found between {start_date} and {end_date}")
             return
             
         # Take only the first two trading days (if available)
         trading_days = trading_days[1:-2]
+        print(f"Processing trading days: {trading_days}")
         logger.info(f"Processing trading days: {trading_days}")
             
         # Get unique sectors from SP500 data
@@ -89,6 +95,7 @@ def main():
         pool = Pool(processes=num_cores)
 
         for date in trading_days:
+            print(f"Processing date: {date}\n\n\n")
             logger.info(f"Processing date: {date}\n\n\n")
             
             # Create arguments list for parallel processing
@@ -110,6 +117,7 @@ def main():
         pool.join()
 
     except Exception as e:
+        print(f"The pipeline raised the following error: {e}")
         logger.error(f"The pipeline raised the following error: {e}")
         sys.exit(1)
 
