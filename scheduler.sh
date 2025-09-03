@@ -10,9 +10,9 @@ export TZ="Europe/Madrid"
 LOG_FILE="scheduler.log"
 ERROR_LOG="scheduler_error.log"
 
-# S3 bucket details
-S3_BUCKET="market-neutral-results"
-S3_REGION="eu-west-1"
+# GCS bucket details
+GCS_BUCKET="grouplang-450317-market-neutral-results"
+GCP_PROJECT="grouplang-450317"
 
 # Function for logging
 log_message() {
@@ -52,26 +52,26 @@ run_scripts_with_params() {
             log_error "testing_agg_plot.py failed with exit code $?"
         fi
         
-        # Upload plots to S3 with optional suffix
+        # Upload plots to GCS with optional suffix
         if [ -n "$s3_suffix" ]; then
-            log_message "Uploading plots and data to S3 bucket $S3_BUCKET with suffix $s3_suffix"
-            if aws s3 sync ./plots s3://$S3_BUCKET/$s3_suffix --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
-               aws s3 sync ./data s3://$S3_BUCKET/$s3_suffix/data --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
-                log_message "S3 upload with suffix $s3_suffix completed successfully"
+            log_message "Uploading plots and data to GCS bucket $GCS_BUCKET with suffix $s3_suffix"
+            if gsutil -m rsync -r -d ./plots gs://$GCS_BUCKET/$s3_suffix 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
+               gsutil -m rsync -r -d ./data gs://$GCS_BUCKET/$s3_suffix/data 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+                log_message "GCS upload with suffix $s3_suffix completed successfully"
             else
-                log_error "S3 upload with suffix $s3_suffix failed with exit code $?"
+                log_error "GCS upload with suffix $s3_suffix failed with exit code $?"
             fi
         else
-            log_message "Uploading plots and data to S3 bucket $S3_BUCKET"
-            if aws s3 sync ./plots s3://$S3_BUCKET --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
-               aws s3 sync ./data s3://$S3_BUCKET/data --region $S3_REGION 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
-                log_message "S3 upload completed successfully"
+            log_message "Uploading plots and data to GCS bucket $GCS_BUCKET"
+            if gsutil -m rsync -r -d ./plots gs://$GCS_BUCKET 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG" && \
+               gsutil -m rsync -r -d ./data gs://$GCS_BUCKET/data 2>&1 | tee -a "$LOG_FILE" "$ERROR_LOG"; then
+                log_message "GCS upload completed successfully"
             else
-                log_error "S3 upload failed with exit code $?"
+                log_error "GCS upload failed with exit code $?"
             fi
         fi
     else
-        log_error "main.py failed with exit code $?, skipping subsequent scripts and S3 upload"
+        log_error "main.py failed with exit code $?, skipping subsequent scripts and GCS upload"
     fi
     
     log_message "Execution with input file $input_file completed"

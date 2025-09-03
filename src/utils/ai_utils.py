@@ -1,7 +1,9 @@
-import boto3
+import vertexai
+from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
+
+
 from loguru import logger
 import os
-import json
 import openai
 
 from market_router import config
@@ -12,41 +14,38 @@ load_dotenv()
 
 
 def create_completion(system_msg, user_msg):
-    try:
-        # Initialize the Bedrock Runtime client
-        bedrock_runtime = boto3.client(
-            service_name="bedrock-runtime",
-            region_name=os.environ.get("AWS_REGION"),
-            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY")
-        )
+    """
+    Create a completion using Google Vertex AI with Text Generation model.
+    
+    Args:
+        system_msg (str): The system message to guide the model's behavior
+        user_msg (str): The user prompt/query to be completed
         
-        # Prepare the request for Claude in Bedrock format
-        # Claude in Bedrock doesn't use system messages the same way
-        # Instead, we'll prepend the system message to the user message
+    Returns:
+        str: The generated text from Vertex AI
+        
+    Raises:
+        CreateCompletionError: If an error occurs during the API call
+    """
+    try:
+        # Initialize Vertex AI with project and location
+        project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "grouplang-450317")
+        location = os.environ.get("GOOGLE_CLOUD_REGION", "us-central1")
+        
+        vertexai.init(project=project_id, location=location)
+        
+        model = GenerativeModel("gemini-2.5-flash")
+        
+        # Combine system and user messages
         combined_message = f"{system_msg}\n\n{user_msg}"
         
-        request_body = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": config["max_tokens"],
-            "temperature": config.get("temperature", 0.7),
-            "messages": [
-                {"role": "user", "content": combined_message}
-            ]
-        }
+        response = model.generate_content(combined_message)
         
-        # Call the Bedrock Invoke API with Claude 3.5 Sonnet
-        response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
-            body=json.dumps(request_body)
-        )
-        
-        # Parse the response
-        response_body = json.loads(response.get("body").read())
-        return response_body["content"][0]["text"]
+        # Return the generated text
+        return response.text
     
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Vertex AI error: {e}")
         raise CreateCompletionError(e)
         
 def create_completion_gpt4(system_msg, user_msg):

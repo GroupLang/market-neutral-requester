@@ -149,66 +149,43 @@ def get_proposal(instance_id: str, api_key: str):
 
 
 def get_predictions(baseline_prompt: str, api_key: str, instance_id: str):
-    import boto3
-    import json
+    from src.utils.ai_utils import create_completion
     
     try:
-        # Initialize the Bedrock Runtime client
-        bedrock_runtime = boto3.client(
-            service_name="bedrock-runtime",
-            region_name=os.environ.get("AWS_REGION"),
-            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY")
-        )
+        # Use vertex AI from ai_utils.py
+        # For vertex, we don't need a system message, so we'll pass an empty string
+        system_msg = ""
+        user_msg = baseline_prompt
         
-        # Prepare the request for Claude in Bedrock format
-        request_body = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": config.get("max_tokens", 16384),
-            "temperature": config.get("temperature", random.uniform(0.0, 1.0)),
-            "messages": [
-                {"role": "user", "content": baseline_prompt}
-            ]
-        }
-        
-        # Call the Bedrock Invoke API with Claude 3.5 Sonnet
-        response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
-            body=json.dumps(request_body)
-        )
-        
-        # Parse the response
-        response_body = json.loads(response.get("body").read())
+        # Call the vertex AI completion function
+        content = create_completion(system_msg, user_msg)
         
         # Format response to match expected structure similar to OpenAI's response
         formatted_response = {
             "id": instance_id,
             "object": "chat.completion",
             "created": int(time.time()),
-            "model": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+            "model": "gemini-2.5-flash",
             "choices": [
                 {
                     "index": 0,
                     "message": {
                         "role": "assistant",
-                        "content": response_body["content"][0]["text"]
+                        "content": content
                     },
                     "finish_reason": "stop"
                 }
             ],
             "usage": {
-                "prompt_tokens": -1,  # Bedrock doesn't provide token counts in the same way
+                "prompt_tokens": -1,  # Vertex doesn't provide token counts in the same way
                 "completion_tokens": -1,
                 "total_tokens": -1
             }
         }
         
-        logger.info("Predictions retrieved successfully using AWS Bedrock")
+        logger.info("Predictions retrieved successfully using Google Vertex AI")
         return formatted_response
 
-    except requests.exceptions.RequestException as e:
-        logger.error(f"HTTP request failed: {e.response.text}")
-        raise e
     except Exception as e:
         logger.error(f"Error: {e}")
         raise e

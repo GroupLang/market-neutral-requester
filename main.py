@@ -46,7 +46,7 @@ def main():
         market = "sp500"
         
         # Get input file path from environment variable or use default
-        input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
+        input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions.csv")
         
         # Get latest date from the input file
         latest_date = get_latest_date_from_csv(input_file)
@@ -96,7 +96,7 @@ def main():
             results = pool.map(process_sector, args_list)
             
             # Get input file path from environment variable or use default
-            input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions_o1.csv")
+            input_file = os.environ.get("INPUT_FILE", "data/gpt_raw_decisions.csv")
             
             # Combine results
             existing_df = pd.read_csv(input_file)
